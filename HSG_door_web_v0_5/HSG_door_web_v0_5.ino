@@ -85,46 +85,68 @@ void doorOpenInterrupt()
   }
 }
 
+boolean shouldAllowAccess(WebServer &server)
+{
+  if (server.checkCredentials("xxxxxxxxxxxxxxxxxxxxxx"))
+  {
+    return true;
+  }
+  else
+  {
+    server.httpUnauthorized();
+  }
+  return false;
+}
+
 void homeCmd(WebServer &server, WebServer::ConnectionType type, char *, bool)
 {
-  server.httpSuccess();
-  if (type != WebServer::HEAD)
+  if (shouldAllowAccess(server))
   {
-    P(Open_link) = "<p><a href=\"/open.html\" id=\"go_open\">Open Door</a></p><h2 style=\"display:none;\" id=\"status_box\">Door Open!</h2>";
-    P(JS_block) = "<script type=\"text/javascript\"> $(window).load(function(){  $('#go_open').click(function(e){  e.preventDefault();$.getJSON('/open.json', function(data){ if(data.status == 'OPEN'){  $('#status_box').slideDown().delay(2000).slideUp(); }  });  });   });</script>";
-    server.printP(Page_header);
-    server.printP(CSS);
-    server.printP(Title_msg);
-    server.printP(Open_link);
-    server.printP(JS_block);
-    server.printP(Page_footer);
+    server.httpSuccess();
+    if (type != WebServer::HEAD)
+    {
+      P(Open_link) = "<p><a href=\"/open.html\" id=\"go_open\">Open Door</a></p><h2 style=\"display:none;\" id=\"status_box\">Door Open!</h2>";
+      P(JS_block) = "<script type=\"text/javascript\"> $(window).load(function(){  $('#go_open').click(function(e){  e.preventDefault();$.getJSON('/open.json', function(data){ if(data.status == 'OPEN'){  $('#status_box').slideDown().delay(2000).slideUp(); }  });  });   });</script>";
+      server.printP(Page_header);
+      server.printP(CSS);
+      server.printP(Title_msg);
+      server.printP(Open_link);
+      server.printP(JS_block);
+      server.printP(Page_footer);
+    }
   }
 }
 
 void openCmd(WebServer &server, WebServer::ConnectionType type, char *, bool)
 {
-  server.httpSuccess();
-  if (type != WebServer::HEAD)
+  if (shouldAllowAccess(server))
   {
-    P(Refresh_header) = "<meta http-equiv=\"refresh\" content=\"3;url=/index.html\">";
-    P(Success_message) = "<h2>Door Open!</h2>";
-    server.printP(Page_header);
-    server.printP(CSS);
-    server.printP(Refresh_header);
-    server.printP(Title_msg);
-    server.printP(Success_message);
-    server.printP(Page_footer);
-    openDoor();
+    server.httpSuccess();
+    if (type != WebServer::HEAD)
+    {
+      P(Refresh_header) = "<meta http-equiv=\"refresh\" content=\"3;url=/index.html\">";
+      P(Success_message) = "<h2>Door Open!</h2>";
+      server.printP(Page_header);
+      server.printP(CSS);
+      server.printP(Refresh_header);
+      server.printP(Title_msg);
+      server.printP(Success_message);
+      server.printP(Page_footer);
+      openDoor();
+    }
   }
 }
 
 void restOpenCmd(WebServer &server, WebServer::ConnectionType type, char *, bool)
 {
-  server.httpSuccess("application/json");
-  if (type != WebServer::HEAD)
+  if (shouldAllowAccess(server))
   {
-    server.printP(REST_success);
-    openDoor();
+    server.httpSuccess("application/json");
+    if (type != WebServer::HEAD)
+    {
+      server.printP(REST_success);
+      openDoor();
+    }
   }
 }
 
